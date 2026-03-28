@@ -5,34 +5,42 @@ const HttpClient = require('../utils/http');
  */
 class AIService {
   constructor() {
-    this.apiKey = process.env.ZHIPU_API_KEY || process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY || process.env.AI_API_KEY;
-    this.baseUrl = process.env.AI_API_BASE || 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
-    this.model = process.env.AI_MODEL || 'glm-4-flash';
+    // 优先级：本地 Ollama > DeepSeek > OpenAI
+    this.useLocal = process.env.USE_LOCAL_MODEL === 'true';
+    
+    if (this.useLocal) {
+      this.baseUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434/api/chat';
+      this.model = process.env.OLLAMA_MODEL || 'mistral';
+    } else {
+      this.apiKey = process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY || process.env.AI_API_KEY;
+      this.baseUrl = process.env.AI_API_BASE || 'https://api.deepseek.com/chat/completions';
+      this.model = process.env.AI_MODEL || 'deepseek-chat';
+    }
   }
   
   /**
    * 调用 AI API
    */
   async chat(messages, options = {}) {
-    if (!this.apiKey) {
+    if (!this.useLocal && !this.apiKey) {
       throw new Error('AI API Key 未配置');
     }
     
     try {
+      const body = this.useLocal 
+        ? this.buildOllamaRequest(messages, options)
+        : this.buildDeepSeekRequest(messages, options);
+      
+      const headers = this.useLocal 
+        ? {}
+        : { 'Authorization': `Bearer ${this.apiKey}` };
+      
       const response = await HttpClient.post(
         this.baseUrl,
+        body,
         {
-          model: options.model || this.model,
-          messages,
-          temperature: options.temperature || 0.7,
-          max_tokens: options.maxTokens || 2000,
-          ...options
-        },
-        {
-          timeout: 60000,
-          headers: {
-            'Authorization': `Bearer ${this.apiKey}`
-          }
+          timeout: 120000,
+          headers
         }
       );
       
@@ -42,12 +50,42 @@ class AIService {
       }
       
       const data = JSON.parse(response.data);
-      return data.choices[0].message.content;
+      
+      if (this.useLocal) {
+        return data.message.content;
+      } else {
+        return data.choices[0].message.content;
+      }
       
     } catch (error) {
       console.error('AI API Error:', error.message);
       throw new Error('AI 服务调用失败: ' + error.message);
     }
+  }
+  
+  /**
+   * 构建 Ollama 请求
+   */
+  buildOllamaRequest(messages, options) {
+    return {
+      model: options.model || this.model,
+      messages,
+      stream: false,
+      ...options
+    };
+  }
+  
+  /**
+   * 构建 DeepSeek 请求
+   */
+  buildDeepSeekRequest(messages, options) {
+    return {
+      model: options.model || this.model,
+      messages,
+      temperature: options.temperature || 0.7,
+      max_tokens: options.maxTokens || 2000,
+      ...options
+    };
   }
   
   /**
