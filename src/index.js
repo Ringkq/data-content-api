@@ -9,7 +9,6 @@ const scrapeRoutes = require('./routes/scrape');
 const summarizeRoutes = require('./routes/summarize');
 const generateRoutes = require('./routes/generate');
 const translateRoutes = require('./routes/translate');
-const ocrRoutes = require('./routes/ocr');
 const extractRoutes = require('./routes/extract');
 
 // 中间件
@@ -59,10 +58,9 @@ app.get('/', (req, res) => {
       summarize: 'POST /api/v1/summarize - AI 摘要',
       generate: 'POST /api/v1/generate - 内容生成',
       translate: 'POST /api/v1/translate - 翻译',
-      ocr: 'POST /api/v1/ocr - 图片 OCR',
       extract: 'POST /api/v1/extract - 数据提取'
     },
-    docs: 'https://github.com/your-repo/data-content-api'
+    docs: 'https://github.com/Ringkq/data-content-api'
   });
 });
 
@@ -72,7 +70,6 @@ app.use('/api/v1', scrapeRoutes);
 app.use('/api/v1', summarizeRoutes);
 app.use('/api/v1', generateRoutes);
 app.use('/api/v1', translateRoutes);
-app.use('/api/v1', ocrRoutes);
 app.use('/api/v1', extractRoutes);
 
 // 404 处理
