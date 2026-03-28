@@ -11,12 +11,5 @@
       "src": "/(.*)",
       "dest": "src/index.js"
     }
-  ],
-  "env": {
-    "API_KEYS": "@api_keys",
-    "ZHIPU_API_KEY": "@zhipu_api_key",
-    "AI_MODEL": "glm-4-flash",
-    "AI_API_BASE": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-    "NODE_ENV": "production"
-  }
+  ]
 }
