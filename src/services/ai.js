@@ -5,9 +5,9 @@ const HttpClient = require('../utils/http');
  */
 class AIService {
   constructor() {
-    this.apiKey = process.env.OPENAI_API_KEY || process.env.AI_API_KEY;
-    this.baseUrl = process.env.AI_API_BASE || 'https://api.openai.com/v1';
-    this.model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+    this.apiKey = process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY || process.env.AI_API_KEY;
+    this.baseUrl = process.env.AI_API_BASE || 'https://api.deepseek.com/chat/completions';
+    this.model = process.env.AI_MODEL || 'deepseek-chat';
   }
   
   /**
@@ -20,7 +20,7 @@ class AIService {
     
     try {
       const response = await HttpClient.post(
-        `${this.baseUrl}/chat/completions`,
+        this.baseUrl,
         {
           model: options.model || this.model,
           messages,
