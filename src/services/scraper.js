@@ -1,5 +1,5 @@
 const cheerio = require('cheerio');
-const fetch = require('node-fetch');
+const HttpClient = require('../utils/http');
 
 /**
  * 网页抓取服务
@@ -16,21 +16,16 @@ class ScraperService {
     const startTime = Date.now();
     
     try {
-      const response = await fetch(url, {
+      const response = await HttpClient.get(url, {
         timeout: this.timeout,
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-          'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-          ...options.headers
-        }
+        headers: options.headers || {}
       });
       
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error(`HTTP ${response.status}`);
       }
       
-      const html = await response.text();
+      const html = response.data;
       const $ = cheerio.load(html);
       
       // 移除不需要的元素

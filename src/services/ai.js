@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+const HttpClient = require('../utils/http');
 
 /**
  * AI 服务 - 调用大模型 API
@@ -19,31 +19,29 @@ class AIService {
     }
     
     try {
-      const response = await fetch(
+      const response = await HttpClient.post(
         `${this.baseUrl}/chat/completions`,
         {
-          method: 'POST',
+          model: options.model || this.model,
+          messages,
+          temperature: options.temperature || 0.7,
+          max_tokens: options.maxTokens || 2000,
+          ...options
+        },
+        {
+          timeout: 60000,
           headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.apiKey}`
-          },
-          body: JSON.stringify({
-            model: options.model || this.model,
-            messages,
-            temperature: options.temperature || 0.7,
-            max_tokens: options.maxTokens || 2000,
-            ...options
-          }),
-          timeout: 60000
+          }
         }
       );
       
-      if (!response.ok) {
-        const error = await response.json();
+      if (response.status !== 200) {
+        const error = JSON.parse(response.data);
         throw new Error(error.error?.message || `HTTP ${response.status}`);
       }
       
-      const data = await response.json();
+      const data = JSON.parse(response.data);
       return data.choices[0].message.content;
       
     } catch (error) {

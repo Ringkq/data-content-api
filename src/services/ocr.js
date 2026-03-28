@@ -78,17 +78,17 @@ class OCRService {
    * 从 URL 识别图片
    */
   async recognizeFromUrl(url, options = {}) {
-    const fetch = require('node-fetch');
+    const HttpClient = require('../utils/http');
     
-    const response = await fetch(url, {
+    const response = await HttpClient.get(url, {
       timeout: 30000
     });
     
-    if (!response.ok) {
+    if (response.status !== 200) {
       throw new Error(`HTTP ${response.status}`);
     }
     
-    const buffer = await response.buffer();
+    const buffer = Buffer.from(response.data, 'binary');
     return this.recognize(buffer, options);
   }
 }
