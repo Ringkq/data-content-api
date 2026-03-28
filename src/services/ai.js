@@ -1,4 +1,4 @@
-const axios = require('axios');
+const fetch = require('node-fetch');
 
 /**
  * AI 服务 - 调用大模型 API
@@ -19,29 +19,36 @@ class AIService {
     }
     
     try {
-      const response = await axios.post(
+      const response = await fetch(
         `${this.baseUrl}/chat/completions`,
         {
-          model: options.model || this.model,
-          messages,
-          temperature: options.temperature || 0.7,
-          max_tokens: options.maxTokens || 2000,
-          ...options
-        },
-        {
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.apiKey}`
           },
+          body: JSON.stringify({
+            model: options.model || this.model,
+            messages,
+            temperature: options.temperature || 0.7,
+            max_tokens: options.maxTokens || 2000,
+            ...options
+          }),
           timeout: 60000
         }
       );
       
-      return response.data.choices[0].message.content;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error?.message || `HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.choices[0].message.content;
       
     } catch (error) {
-      console.error('AI API Error:', error.response?.data || error.message);
-      throw new Error('AI 服务调用失败: ' + (error.response?.data?.error?.message || error.message));
+      console.error('AI API Error:', error.message);
+      throw new Error('AI 服务调用失败: ' + error.message);
     }
   }
   

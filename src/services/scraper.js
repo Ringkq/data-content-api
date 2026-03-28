@@ -1,5 +1,5 @@
-const axios = require('axios');
 const cheerio = require('cheerio');
+const fetch = require('node-fetch');
 
 /**
  * 网页抓取服务
@@ -16,7 +16,7 @@ class ScraperService {
     const startTime = Date.now();
     
     try {
-      const response = await axios.get(url, {
+      const response = await fetch(url, {
         timeout: this.timeout,
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -26,7 +26,11 @@ class ScraperService {
         }
       });
       
-      const html = response.data;
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const html = await response.text();
       const $ = cheerio.load(html);
       
       // 移除不需要的元素

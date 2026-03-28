@@ -78,14 +78,18 @@ class OCRService {
    * 从 URL 识别图片
    */
   async recognizeFromUrl(url, options = {}) {
-    const axios = require('axios');
+    const fetch = require('node-fetch');
     
-    const response = await axios.get(url, {
-      responseType: 'arraybuffer',
+    const response = await fetch(url, {
       timeout: 30000
     });
     
-    return this.recognize(Buffer.from(response.data), options);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    
+    const buffer = await response.buffer();
+    return this.recognize(buffer, options);
   }
 }
 
