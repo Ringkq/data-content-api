@@ -5,9 +5,9 @@ const HttpClient = require('../utils/http');
  */
 class AIService {
   constructor() {
-    this.apiKey = process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY || process.env.AI_API_KEY;
-    this.baseUrl = process.env.AI_API_BASE || 'https://api.deepseek.com/chat/completions';
-    this.model = process.env.AI_MODEL || 'deepseek-chat';
+    this.apiKey = process.env.ZHIPU_API_KEY || process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY || process.env.AI_API_KEY;
+    this.baseUrl = process.env.AI_API_BASE || 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
+    this.model = process.env.AI_MODEL || 'glm-4-flash';
   }
   
   /**
