@@ -2,7 +2,13 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-require('dotenv').config();
+
+// 加载环境变量
+try {
+  require('dotenv').config();
+} catch (e) {
+  // dotenv 可选
+}
 
 // 路由
 const scrapeRoutes = require('./routes/scrape');
